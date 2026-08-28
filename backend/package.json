@@ -1,15 +1,18 @@
 {
-  "name": "vedaai",
+  "name": "backend",
   "version": "1.0.0",
   "private": true,
-  "description": "Smart Answer Sheet Analysis & AI Evaluation",
+  "type": "module",
+  "main": "index.js",
   "scripts": {
-    "install:all": "npm install --prefix frontend && npm install --prefix server",
-    "dev": "concurrently -n frontend,server -c blue,green \"npm run dev --prefix frontend\" \"npm run dev --prefix server\"",
-    "build": "npm run build --prefix frontend",
-    "start": "npm run start --prefix server"
+    "dev": "node --watch index.js",
+    "start": "node index.js"
   },
-  "devDependencies": {
-    "concurrently": "^9.2.4"
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "multer": "^2.2.0"
   }
 }
