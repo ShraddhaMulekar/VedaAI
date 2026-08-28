@@ -11,7 +11,7 @@ it was answered. It also grades each matched answer and gives overall feedback.
 
 - **Frontend**: React (Vite) + Tailwind CSS, `react-pdf` for rendering PDF pages with highlight overlays
 - **Backend**: Node.js + Express, single `/api/analyze` endpoint
-- **AI**: Google Gemini (`gemini-2.5-flash`) — one structured call extracts questions, extracts answers
+- **AI**: Google Gemini (`gemini-3.6-flash`) — one structured call extracts questions, extracts answers
   with bounding boxes, maps them, and grades them. Free tier via [Google AI Studio](https://aistudio.google.com/app/apikey).
 - **Storage**: none — everything is processed in memory per request; uploaded files never touch disk.
 

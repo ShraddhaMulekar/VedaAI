@@ -31,8 +31,12 @@ export default function AnswerViewer({ files, highlightBoxes }) {
   const [pdfPageCounts, setPdfPageCounts] = useState({});
   const pageRefs = useRef({});
 
-  const urls = useMemo(() => files.map((f) => URL.createObjectURL(f)), [files]);
-  useEffect(() => () => urls.forEach((u) => URL.revokeObjectURL(u)), [urls]);
+  const [urls, setUrls] = useState([]);
+  useEffect(() => {
+    const created = files.map((f) => URL.createObjectURL(f));
+    setUrls(created);
+    return () => created.forEach((u) => URL.revokeObjectURL(u));
+  }, [files]);
 
   const fileOffsets = useMemo(() => {
     const offsets = [];
