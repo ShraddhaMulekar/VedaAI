@@ -1,5 +1,8 @@
 import { useState } from "react";
+import Sidebar from "./components/Sidebar";
+import Topbar from "./components/Topbar";
 import UploadForm from "./components/UploadForm";
+import LoadingState from "./components/LoadingState";
 import ResultsView from "./components/ResultsView";
 import { analyzeSheets } from "./api";
 
@@ -8,6 +11,7 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [answerFiles, setAnswerFiles] = useState([]);
   const [error, setError] = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   async function handleAnalyze(questionFiles, files) {
     setStatus("analyzing");
@@ -30,31 +34,25 @@ export default function App() {
     setError("");
   }
 
-  return (
-    <div className="min-h-screen">
-      <header className="border-b border-slate-200 bg-white px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-800">VedaAI</h1>
-          <p className="text-xs text-slate-500">Smart Answer Sheet Analysis &amp; AI Evaluation</p>
-        </div>
-        {status === "results" && (
-          <button
-            onClick={handleReset}
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
-          >
-            Analyze another sheet
-          </button>
-        )}
-      </header>
+  const collapsed = status === "analyzing" || sidebarCollapsed;
 
-      <main className="p-6">
-        {status !== "results" && (
-          <UploadForm onAnalyze={handleAnalyze} status={status} error={error} />
-        )}
-        {status === "results" && result && (
-          <ResultsView result={result} answerFiles={answerFiles} />
-        )}
-      </main>
+  return (
+    <div className="h-screen flex bg-gradient-to-br from-slate-50 to-slate-200">
+      <Sidebar collapsed={collapsed} onToggle={() => setSidebarCollapsed((c) => !c)} />
+
+      <div className="flex-1 flex flex-col min-w-0">
+        <Topbar showBack={status === "results"} onBack={handleReset} />
+
+        <main className="flex-1 min-h-0 p-4 sm:p-8 flex flex-col overflow-y-auto">
+          {(status === "idle" || status === "error") && (
+            <UploadForm onAnalyze={handleAnalyze} error={error} />
+          )}
+          {status === "analyzing" && <LoadingState />}
+          {status === "results" && result && (
+            <ResultsView result={result} answerFiles={answerFiles} />
+          )}
+        </main>
+      </div>
     </div>
   );
 }

@@ -25,10 +25,12 @@ const responseSchema = {
           matched: { type: SchemaType.BOOLEAN },
           answerText: { type: SchemaType.STRING, nullable: true },
           boxes: { type: SchemaType.ARRAY, items: boxSchema },
+          maxMarks: { type: SchemaType.INTEGER, description: "Marks this question is worth, your best-effort estimate from its complexity (2-5)" },
+          marksAwarded: { type: SchemaType.INTEGER, nullable: true, description: "Marks awarded out of maxMarks, null for unmatched questions" },
           isCorrect: { type: SchemaType.BOOLEAN, nullable: true },
           feedback: { type: SchemaType.STRING, nullable: true },
         },
-        required: ["number", "text", "matched", "boxes"],
+        required: ["number", "text", "matched", "boxes", "maxMarks"],
       },
     },
     unmatchedAnswers: {
@@ -65,7 +67,8 @@ Step 3 - Unmatched handwriting:
 Any handwritten region on the answer sheet that does not correspond to any extracted question (stray notes, rough work, an answer you cannot confidently map to a question number) goes into unmatchedAnswers[] instead, each with its own transcription and boxes.
 
 Step 4 - Grade:
-For every matched question, set isCorrect to your best-effort judgement of whether the answer is substantively correct, and feedback to 1-2 sentences of constructive feedback. Leave isCorrect/feedback null for unmatched questions.
+For every extracted question, set maxMarks to your best-effort estimate of how many marks it is worth (2-5, scaled to its complexity - a one-line factual question is worth less than a multi-part explanation or labelled diagram).
+For every matched question, set isCorrect to your best-effort judgement of whether the answer is substantively correct, marksAwarded to an integer from 0 to maxMarks reflecting partial credit, and feedback to 1-2 sentences of constructive feedback. Leave isCorrect/marksAwarded/feedback null for unmatched questions.
 
 Step 5 - Overall:
 Write overallFeedback: 2-4 sentences summarizing the student's performance across the whole answer sheet.
@@ -128,9 +131,10 @@ function shapeResult(parsed) {
     text: q.text,
     status: q.matched ? "answered" : "unanswered",
     answer: q.matched ? { text: q.answerText ?? "", boxes: q.boxes || [] } : null,
+    maxMarks: q.maxMarks ?? 2,
     grading:
-      q.matched && (q.isCorrect !== undefined && q.isCorrect !== null)
-        ? { isCorrect: q.isCorrect, feedback: q.feedback ?? "" }
+      q.matched && q.marksAwarded !== undefined && q.marksAwarded !== null
+        ? { isCorrect: q.isCorrect, marksAwarded: q.marksAwarded, maxMarks: q.maxMarks ?? 2, feedback: q.feedback ?? "" }
         : null,
   }));
 
@@ -142,6 +146,8 @@ function shapeResult(parsed) {
 
   const answered = questions.filter((q) => q.status === "answered").length;
   const correct = questions.filter((q) => q.grading?.isCorrect === true).length;
+  const marksAwarded = questions.reduce((sum, q) => sum + (q.grading?.marksAwarded ?? 0), 0);
+  const maxMarks = questions.reduce((sum, q) => sum + q.maxMarks, 0);
 
   return {
     questions,
@@ -150,6 +156,8 @@ function shapeResult(parsed) {
       totalQuestions: questions.length,
       answered,
       correct,
+      marksAwarded,
+      maxMarks,
       overallFeedback: parsed.overallFeedback || "",
     },
   };
