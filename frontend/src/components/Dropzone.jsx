@@ -6,7 +6,7 @@ function formatSize(bytes) {
 }
 
 export default function Dropzone({ label, accentLabel, files, onChange, disabled }) {
-  const inputId = `file-${label.replace(/\s+/g, "-").toLowerCase()}`;
+  const inputId = `file-${accentLabel.replace(/\s+/g, "-").toLowerCase()}`;
   const file = files[0] ?? null;
 
   function handleFiles(fileList) {

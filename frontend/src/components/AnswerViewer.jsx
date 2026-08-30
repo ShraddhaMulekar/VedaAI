@@ -55,6 +55,18 @@ export default function AnswerViewer({ files, highlightBoxes, tag, tone }) {
   const [zoom, setZoom] = useState(100);
   const [currentPage, setCurrentPage] = useState(1);
   const pageRefs = useRef({});
+  const scrollRef = useRef(null);
+  const [fitWidth, setFitWidth] = useState(BASE_WIDTH);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setFitWidth(Math.min(BASE_WIDTH, entry.contentRect.width));
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const [urls, setUrls] = useState([]);
   useEffect(() => {
@@ -91,7 +103,7 @@ export default function AnswerViewer({ files, highlightBoxes, tag, tone }) {
     return highlightBoxes.filter((b) => b.page === pageNumber);
   }
 
-  const renderWidth = (BASE_WIDTH * zoom) / 100;
+  const renderWidth = (fitWidth * zoom) / 100;
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 flex flex-col h-full overflow-hidden">
@@ -145,7 +157,7 @@ export default function AnswerViewer({ files, highlightBoxes, tag, tone }) {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-auto p-4 bg-slate-50">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-auto p-4 bg-slate-50">
         {files.length === 0 && <p className="text-sm text-slate-400">No answer sheet loaded.</p>}
 
         {files.map((file, fileIndex) => {

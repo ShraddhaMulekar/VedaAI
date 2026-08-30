@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ArrowRight, UserRound, Sparkles, Clock, BookOpen, Bell } from "lucide-react";
+import { ArrowRight, Sparkles, Clock, BookOpen, Bell } from "lucide-react";
 import Dropzone from "./Dropzone";
+import teacherPhoto from "../assets/teacher.jpg";
 
 export default function UploadForm({ onAnalyze, error }) {
   const [questionFiles, setQuestionFiles] = useState([]);
@@ -27,12 +28,12 @@ export default function UploadForm({ onAnalyze, error }) {
       <div className="mt-8 flex justify-center">
         <div className="relative h-40 w-40 rounded-full bg-brand-50 flex items-center justify-center">
           <div className="absolute inset-3 rounded-full bg-brand-100" />
-          <img className="relative h-20 w-20 rounded-full bg-white ring-4 ring-white flex items-center justify-center text-slate-400 shadow-sm">
-            <UserRound className="h-9 w-9" />
-          </img>
+          <span className="relative h-24 w-24 rounded-full ring-4 ring-white shadow-sm overflow-hidden">
+            <img src={teacherPhoto} alt="Teacher" className="h-full w-full object-cover" />
+          </span>
           <Badge icon={Clock} className="top-1 right-4" />
           <Badge icon={BookOpen} className="top-8 -left-1" />
-          <Badge icon={Bell} className="bottom-1 right-2" />
+          <Badge icon={Bell} className="bottom-1 right-28" />
           <Badge icon={Sparkles} className="bottom-8 -right-1" />
         </div>
       </div>
