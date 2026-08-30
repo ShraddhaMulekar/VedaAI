@@ -1,19 +1,36 @@
 import express from "express";
 import multer from "multer";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import "dotenv/config";
 import { analyze } from "./gemini.js";
+import { connectDB } from "./db.js";
+import { requireAuth } from "./middleware/auth.js";
+import authRoutes from "./routes/auth.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+  "http://localhost:5176",
+].filter(Boolean);
+
+app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(express.json());
+app.use(cookieParser());
+
+app.use("/api/auth", authRoutes);
 
 app.post(
   "/api/analyze",
+  requireAuth,
   upload.fields([
     { name: "questionPaper", maxCount: 10 },
     { name: "answerSheet", maxCount: 10 },
@@ -46,6 +63,13 @@ app.get(/.*/, (req, res, next) => {
 });
 
 const port = process.env.PORT || 5174;
-app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`);
-});
+connectDB()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Server listening on http://localhost:${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to connect to MongoDB:", err.message);
+    process.exit(1);
+  });
