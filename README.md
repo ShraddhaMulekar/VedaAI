@@ -2,6 +2,8 @@
 
 Smart Answer Sheet Analysis & AI Evaluation
 
+**Live**: [veda-ai-ebon.vercel.app](https://veda-ai-ebon.vercel.app/) (frontend on Vercel) · [vedaai-ufrd.onrender.com](https://vedaai-ufrd.onrender.com) (backend on Render)
+
 A teacher uploads a question paper and a student's handwritten answer sheet. The app extracts every
 question (including labelled sub-parts like `11(a)`/`11(b)`), locates the student's answer to each one,
 and shows them side by side — clicking a question highlights the exact region of the answer sheet where
@@ -42,17 +44,17 @@ backend/    Express API — one route, one Gemini call, no database
 
 ## Deploying
 
-Build the frontend and let the Express server serve it as static files, so it's a single deployable service:
+Deployed as two separate services — backend on Render, frontend on Vercel.
 
-```
-cd frontend && npm run build
-cd ../backend && npm start
-```
-
-Deploy to any Node host (Render, Railway, Fly.io, etc.):
+**Backend (Render)** — configured via `render.yaml` at the repo root:
 - Build command: `cd frontend && npm install && npm run build && cd ../backend && npm install`
 - Start command: `cd backend && npm start`
 - Environment variable: `GEMINI_API_KEY`
+
+**Frontend (Vercel)**:
+- Root directory: `frontend`
+- Environment variable: `VITE_API_URL` set to the deployed backend URL (e.g. `https://vedaai-ufrd.onrender.com`)
+- Redeploy after changing `VITE_API_URL` — Vite bakes env vars in at build time.
 
 ## Notes on the design trade-offs
 
